@@ -10,6 +10,23 @@ export const dynamic = "force-dynamic";
 const YOOKASSA_API = "https://api.yookassa.ru/v3/payments";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * ЮKassa ограничивает metadata 16 ключами и 512 символами на значение и
+ * отклоняет платёж целиком при превышении. Пустые значения не отправляем.
+ */
+function sanitizeExtra(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object") return {};
+
+  const result: Record<string, string> = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof raw !== "string" || raw.length === 0) continue;
+    // 14 оставляет место под plan и email, которые добавляются ниже.
+    if (Object.keys(result).length >= 14) break;
+    result[key] = raw.slice(0, 512);
+  }
+  return result;
+}
+
 export async function POST(request: Request) {
   let payload: unknown;
   try {
@@ -18,7 +35,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Некорректный запрос." }, { status: 400 });
   }
 
-  const body = payload as { plan?: unknown; email?: unknown; returnOrigin?: unknown };
+  const body = payload as {
+    plan?: unknown;
+    email?: unknown;
+    returnOrigin?: unknown;
+    extra?: unknown;
+  };
 
   if (!isPlanId(body.plan)) {
     return NextResponse.json({ error: "Неизвестный тариф." }, { status: 400 });
@@ -66,7 +88,8 @@ export async function POST(request: Request) {
         },
       ],
     },
-    metadata: { plan: plan.id, email },
+    // Параметры расчёта уезжают сюда: вебхук больше ниоткуда их не узнает.
+    metadata: { ...sanitizeExtra(body.extra), plan: plan.id, email },
   };
 
   try {

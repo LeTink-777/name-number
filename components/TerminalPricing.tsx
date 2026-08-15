@@ -57,7 +57,7 @@ function useCountdown() {
   return `${pad(Math.floor(totalSeconds / 3600))}:${pad(Math.floor((totalSeconds % 3600) / 60))}:${pad(totalSeconds % 60)}`;
 }
 
-export function TerminalPricing() {
+export function TerminalPricing({ name }: { name: string }) {
   const [visible, setVisible] = useState(0);
   const [typed, setTyped] = useState("");
   const [email, setEmail] = useState("");
@@ -105,7 +105,7 @@ export function TerminalPricing() {
     }
     setError(null);
     setPending(plan);
-    const failure = await startCheckout(plan, trimmed);
+    const failure = await startCheckout(plan, trimmed, { name });
     if (failure) {
       setError(`> Ошибка: ${failure}`);
       setPending(null);

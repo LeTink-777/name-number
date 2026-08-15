@@ -4,6 +4,14 @@ const APEX_HOST = "moe-chislo.online";
 const WWW_HOST = "www.moe-chislo.online";
 
 const nextConfig: NextConfig = {
+  // Генератор PDF читает эти шрифты с диска во время запроса. Их никто не
+  // импортирует, поэтому трассировка файлов не увидит зависимость и роуты
+  // уедут в деплой без шрифтов — вся кириллица превратится в мусор.
+  outputFileTracingIncludes: {
+    "/api/webhook": ["./public/fonts/**"],
+    "/api/generate-pdf": ["./public/fonts/**"],
+  },
+
   poweredByHeader: false,
 
   async redirects() {

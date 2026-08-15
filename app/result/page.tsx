@@ -161,7 +161,7 @@ function ResultInner() {
         </section>
 
         <section style={{ marginTop: 38 }}>
-          <TerminalPricing />
+          <TerminalPricing name={rawName} />
         </section>
       </main>
     </>
