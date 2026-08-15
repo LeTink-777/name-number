@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import axios from "axios";
-import { PLANS, SITE_URL, isPlanId } from "@/lib/plans";
+import { PLANS, isPlanId } from "@/lib/plans";
+import { resolveReturnUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Некорректный запрос." }, { status: 400 });
   }
 
-  const body = payload as { plan?: unknown; email?: unknown };
+  const body = payload as { plan?: unknown; email?: unknown; returnOrigin?: unknown };
 
   if (!isPlanId(body.plan)) {
     return NextResponse.json({ error: "Неизвестный тариф." }, { status: 400 });
@@ -49,7 +50,8 @@ export async function POST(request: Request) {
     description: plan.description,
     confirmation: {
       type: "redirect",
-      return_url: `${SITE_URL}/success?plan=${plan.id}`,
+      // Validated against the allowlist in lib/site.ts.
+      return_url: resolveReturnUrl(body.returnOrigin, plan.id),
     },
     receipt: {
       customer: { email },
