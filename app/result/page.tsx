@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft, Lock, MoveRight } from "lucide-react";
 import { MatrixRain } from "@/components/MatrixRain";
 import { TerminalPricing } from "@/components/TerminalPricing";
 import { LOCKED_TITLES, PROFILES, calculateNameNumber } from "@/lib/numerology";
@@ -63,13 +63,18 @@ function ResultInner() {
 
           <p
             style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
               fontFamily: "var(--font-mono)",
               fontSize: 13,
               color: "var(--text-secondary)",
               margin: "4px 0 0",
             }}
           >
-            сумма букв: {result.sum} → {result.number}
+            сумма букв: {result.sum}
+            <MoveRight size={14} aria-hidden="true" />
+            {result.number}
           </p>
 
           <div style={{ marginTop: 26 }}>
